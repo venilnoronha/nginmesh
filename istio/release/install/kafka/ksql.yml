@@ -1,4 +1,4 @@
-apiVersion: v1
+# https://github.com/confluentinc/ksql/blob/4.1.0-post/docs/tutorials/docker-compose.ymlapiVersion: v1
 kind: Pod
 metadata:
   name: ksql-cli
