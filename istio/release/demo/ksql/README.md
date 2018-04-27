@@ -57,6 +57,12 @@ This will install grafana in the namespace 'kafka'
 
 Now open grafana at: http://localhost:3000,
 
+Run following script to get password for grafana.  
+
+```
+./grafana-password.sh
+```
+
 Login in and create dashboard
 
 
