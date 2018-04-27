@@ -40,17 +40,17 @@ This will install elastic cluster in the namespace 'elastic'
 This will install grafana in the namespace 'kafka'
 
 ``
-### Start following port-forwarding, this is required in order to connect kafka to elastic search to grafana
+### Run following script set up port-forwarding to ksql, connect, elastic search and grafana
 ```
-./elastic-portforward.sh
-./connect-portforward.sh
-./grafana-portforward.sh
+./all-portforward.sh
 ```
 
-### Connect following tables to Elastic Search and Set up data source to Grafana
+### For each of the KSQL table, run following script to connect KSQL -> connect -> elastic search -> grafna
 
 ```
-./ksql-tables-to-grafana.sh request_path_stat
+./ksql-tables-to-grafana.sh request_per_min
+./ksql-tables-to-grafana.sh request_per_min_max_avg
+./ksql-tables-to-grafana.sh request_activity
 ```
 
 ### Grafana
@@ -63,7 +63,7 @@ Run following script to get password for grafana.
 ./grafana-password.sh
 ```
 
-Login in and create dashboard
+Then import dashboard using 'grafana-dashboard.json'
 
 
 
