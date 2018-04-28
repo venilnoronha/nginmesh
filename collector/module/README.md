@@ -157,7 +157,9 @@ Build system use Docker to generate the module binary.
 
   First deploy test nginx server in the cluster
   ```make test-k8-only```  
-  Then test using ```make test-http-report'''
+  Then test using
+  
+  ```make test-http-report```
 
 
 ## Running unit test

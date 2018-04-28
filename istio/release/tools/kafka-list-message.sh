@@ -1,6 +1,8 @@
 #!/bin/bash
 # list new message
 # assume testclient has been installed
+# headless is same as bootstrap
+set -x
 TOPIC_NAME=$1
 CLIENT=testclient
 KAFKA_NAME=my-kafka

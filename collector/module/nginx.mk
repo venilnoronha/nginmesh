@@ -174,7 +174,7 @@ kafka-add-test-topic:
 # display message from beggining on test channel
 kafka-test-list-message:
 	kubectl run temp-kafka --image solsson/kafka --rm -ti --command -- bash \
-	bin/kafka-console-consumer.sh --bootstrap-server broker.kafka:9092 --topic test --from-beginning	
+	bin/kafka-console-consumer.sh --bootstrap-server broker.kafka:9092 --topic nginx --from-beginning	
 
 test-nginx-full:	build-module test-nginx-only
 

@@ -74,7 +74,7 @@ fn send_stat(message: &str,server_name: &str,topic: &str) {
     let _ = write!(&mut buf, "{}", message); 
     let producer = producer_result.unwrap();
     producer.send(&Record::from_value(topic, buf.as_bytes())).unwrap();
-    ngx_event_debug!("send event to kafka topic test");
+    ngx_event_debug!("send event to kafka topic: {}",topic);
 
 }
 
