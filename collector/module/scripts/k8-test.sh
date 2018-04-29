@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 DEPLOYMENT_NAME=$1
 DOCKER_NGINX_NAME=$2
 DOCKER_MODULE_IMAGE=$3

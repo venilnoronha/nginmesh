@@ -1,6 +1,6 @@
 
 use serde_json::{Map,Value};
-use chrono::{Utc,TimeZone};
+use chrono::Utc;
 use ngx_rust::bindings:: { ngx_http_request_s, ngx_http_headers_out_t} ;
 use nginmesh_collector_transport::attribute::attr_wrapper::AttributeWrapper;
 use nginmesh_collector_transport::attribute::global_dict::{ REQUEST_HEADER, REQUEST_HOST, REQUEST_METHOD, REQUEST_PATH,

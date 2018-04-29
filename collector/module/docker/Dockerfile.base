@@ -18,7 +18,7 @@ ADD ./Cargo.lock /src
 ADD ./collector-ngx /src/collector-ngx
 ADD ./collector-transport /src/collector-transport
 ADD ./collector-tests /src/collector-tests
-RUN cd /src;cargo build --all
+RUN cd /src;make nginx-module
 
 
 

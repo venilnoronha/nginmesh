@@ -51,7 +51,7 @@ impl AttributeWrapper  {
     }
 
 
-    pub fn insert_time_stamp_attribute(&mut self, key: &str, value: DateTime<Utc>) {
+    pub fn insert_time_stamp_attribute(&mut self, key: &str, _value: DateTime<Utc>) {
        // let unix_time = value.timestamp();
        let current_time = get_time();
        let milliseconds = (current_time.sec as i64 * 1000) + 

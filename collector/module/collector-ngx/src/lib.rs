@@ -23,3 +23,6 @@ pub mod collector_threads;
 pub use collector_threads::nginmesh_collector_init;
 pub use collector_threads::nginmesh_collector_exit;
 pub use collector_report::nginmesh_collector_report_handler;
+pub use collector_report::ngx_http_collector_create_loc_conf;
+pub use collector_report::ngx_http_collector_merge_loc_conf;
+pub use collector_report::ngx_http_collector_create_srv_conf;

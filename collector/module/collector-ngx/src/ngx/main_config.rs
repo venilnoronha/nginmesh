@@ -1,6 +1,6 @@
 extern crate ngx_rust;
 
-use ngx_rust::bindings:: { ngx_int_t, ngx_str_t } ;
+use ngx_rust::bindings:: ngx_str_t ;
 
 
 #[repr(C)]

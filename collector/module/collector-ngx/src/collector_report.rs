@@ -1,13 +1,13 @@
 
-use std::sync::mpsc::{channel};
 use std::sync::Mutex;
 use std::collections::HashMap;
+use std::mem;
+use std::ptr;
+use std::os::raw::c_void;
+use std::ffi::CString;
 
 
-
-use ngx_rust::bindings:: { ngx_array_t,ngx_str_t };
-use ngx_rust::bindings::ngx_http_request_s;
-use ngx_rust::bindings::ngx_http_upstream_state_t;
+use ngx_rust::bindings::*;
 
 use nginmesh_collector_transport::attribute::attr_wrapper::AttributeWrapper;
 use nginmesh_collector_transport::attribute::global_dict::{ RESPONSE_DURATION };
@@ -39,6 +39,69 @@ lazy_static!  {
     static ref PRODUCER_CACHE: Mutex<HashMap<String,Producer>> = Mutex::new(HashMap::new());
 }
 
+
+
+#[no_mangle]
+pub  extern "C" fn ngx_http_collector_create_loc_conf(cf: &ngx_conf_s)  -> *mut c_void {
+
+    ngx_event_debug!("create collector loc conf");
+    unsafe {
+        ngx_pcalloc((*cf).pool,mem::size_of::<ngx_http_collector_loc_conf_t>())
+    }  
+}
+
+
+#[no_mangle]
+pub  extern "C" fn ngx_http_collector_create_srv_conf(cf: &ngx_conf_s) -> *mut ngx_http_collector_srv_conf_t {
+
+    ngx_event_debug!("create collector srv conf");
+
+    unsafe {
+        let srv_conf_ptr = ngx_pcalloc((*cf).pool,mem::size_of::<ngx_http_collector_srv_conf_t>()) as *mut ngx_http_collector_srv_conf_t;
+         if srv_conf_ptr.is_null() {
+            return srv_conf_ptr;
+        }
+        let srv_conf: &mut ngx_http_collector_srv_conf_t = &mut * srv_conf_ptr;
+        srv_conf.init();
+        return srv_conf_ptr;
+    } 
+}
+
+
+
+macro_rules! ngx_conf_merge_str_value {
+    ( $conf:expr,$prev:expr,$default:expr ) => (
+        
+        if $conf.data.is_null() {                                                 
+            if !$prev.data.is_null()  {                                                    
+                $conf.len = $prev.len;                                            
+                $conf.data = $prev.data;                                          
+            } else {
+                let c_string = CString::new($default).unwrap();                                                             
+                $conf.len = $default.len() ;                         
+                $conf.data = c_string.into_raw() as *mut u_char;                             
+            }                                               
+        }
+        
+    )
+}
+
+macro_rules! NGX_CONF_OK {
+    () =>  ( ptr::null() )
+}
+ 
+#[no_mangle] 
+pub extern "C" fn ngx_http_collector_merge_loc_conf(_cf: &mut ngx_conf_s,
+        parent: &mut ngx_http_collector_loc_conf_t, 
+        child: &mut ngx_http_collector_loc_conf_t) -> *const u_char {
+ 
+    ngx_event_debug!("rust: merging collector loc conf");
+    ngx_conf_merge_str_value!(child.topic,parent.topic, "");
+    ngx_conf_merge_str_value!(child.destination_service,parent.destination_service,"");
+    NGX_CONF_OK!() 
+}
+
+
 // send to background thread using channels
 #[no_mangle]
 pub extern fn nginmesh_set_collector_server_config(server: &ngx_str_t)  {
@@ -63,7 +126,8 @@ pub extern fn nginmesh_set_collector_server_config(server: &ngx_str_t)  {
 }
 
 fn send_stat(message: &str,server_name: &str,topic: &str) {
-    
+
+    // test comment
     let mut cache = PRODUCER_CACHE.lock().unwrap();
     let producer_result = cache.get_mut(server_name);
     if producer_result.is_none()  {

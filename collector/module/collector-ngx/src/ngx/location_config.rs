@@ -1,6 +1,6 @@
 extern crate ngx_rust;
 
-use ngx_rust::bindings:: { ngx_str_t, ngx_flag_t } ;
+use ngx_rust::bindings:: { ngx_str_t } ;
 use nginmesh_collector_transport::attribute::attr_wrapper::AttributeWrapper;
 use nginmesh_collector_transport::attribute::global_dict::{ DESTINATION_SERVICE };
 

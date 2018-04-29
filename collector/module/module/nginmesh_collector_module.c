@@ -48,10 +48,10 @@ static ngx_int_t ngx_http_collector_report_handler(ngx_http_request_t *r);
 static ngx_int_t ngx_http_collector_filter_init(ngx_conf_t *cf);
 
 // create configuration
-static void *ngx_http_collector_create_loc_conf(ngx_conf_t *cf);
-static char *ngx_http_collector_merge_loc_conf(ngx_conf_t *cf, void *parent,void *child);
+void *ngx_http_collector_create_loc_conf(ngx_conf_t *cf);
+char *ngx_http_collector_merge_loc_conf(ngx_conf_t *cf, void *parent,void *child);
 
-static void *ngx_http_collector_create_srv_conf(ngx_conf_t *cf);
+void *ngx_http_collector_create_srv_conf(ngx_conf_t *cf);
 static char *ngx_http_collector_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child);
 
 static void *ngx_http_collector_create_main_conf(ngx_conf_t *cf);
@@ -236,6 +236,7 @@ static ngx_int_t ngx_http_collector_report_handler(ngx_http_request_t *r)
 } 
 
 // create loc conf for collector
+/*
 static void *ngx_http_collector_create_loc_conf(ngx_conf_t *cf) {
 
     ngx_http_collector_loc_conf_t  *conf;
@@ -245,24 +246,33 @@ static void *ngx_http_collector_create_loc_conf(ngx_conf_t *cf) {
         return NULL;
     }
 
+
     ngx_log_debug(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0, "set up  collector location config");
 
     return conf;
 }
+*/
 
+/*
 static char *ngx_http_collector_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 {
-    ngx_log_debug(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0, "merging loc conf");
+    ngx_log_debug(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0, "start merging loc conf");
 
     ngx_http_collector_loc_conf_t  *prev = parent;
     ngx_http_collector_loc_conf_t  *conf = child;
 
     ngx_conf_merge_str_value(conf->topic, prev->topic, "");
-    ngx_conf_merge_str_value(conf->destination_service,prev->destination_service,"")
+    ngx_conf_merge_str_value(conf->destination_service,prev->destination_service,"");
+
+    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0, "default size: %d", 200);
+    ngx_log_debug(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0, "end merging loc conf");
+
 
     return NGX_CONF_OK;
-}
+} 
+*/
 
+/*
 static void *ngx_http_collector_create_srv_conf(ngx_conf_t *cf) {
 
     ngx_http_collector_srv_conf_t  *conf;
@@ -277,7 +287,7 @@ static void *ngx_http_collector_create_srv_conf(ngx_conf_t *cf) {
     ngx_log_debug(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0, "set up collector srv config");
 
     return conf;
-}
+}*/
 
 
 static char *ngx_http_collector_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)

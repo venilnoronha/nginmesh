@@ -1,7 +1,8 @@
 NGINX_VER = 1.13.7
 TAG=dev
-RUST_COMPILER_TAG = 1.21.0
+RUST_COMPILER_TAG = 1.25.0
 DOCKER_REPO=nginmesh
+export HOST_PROJ_DIR=$(shell PWD)
 UNAME_S := $(shell uname -s)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
 NGX_DEBUG="--with-debug"
@@ -27,7 +28,7 @@ DOCKER_MODULE_IMAGE = $(DOCKER_REPO)/${MODULE_NAME}
 DOCKER_MODULE_BASE_IMAGE = $(DOCKER_REPO)/${MODULE_NAME}-base
 DOCKER_MODULE_NGINX_BUILD_IMAGE = $(DOCKER_REPO)/${MODULE_NAME}-ngx-build
 DOCKER_MODULE_NGINX_BASE_IMAGE= $(DOCKER_REPO)/${MODULE_NAME}-ngx-base
-DOCKER_RUST_IMAGE = $(DOCKER_REPO)/ngx-rust-tool:${RUST_COMPILER_TAG}
+RUST_TOOL_IMAGE = $(DOCKER_REPO)/ngx-rust-tool:${RUST_COMPILER_TAG}
 DOCKER_NGIX_IMAGE = $(DOCKER_REPO)/nginx-dev:${NGINX_VER}
 DOCKER_MIXER_IMAGE = $(DOCKER_REPO)/ngix-mixer:1.0
 MODULE_SO_DIR=nginx/nginx-linux/objs
@@ -37,8 +38,7 @@ MODULE_SO_HOST=module/release/${MODULE_NAME}.so
 NGINX_SO_HOST=config
 
 
-DOCKER_BUILD_TOOL=docker run -it --rm -v ${ROOT_DIR}:/src -w /src/${MODULE_PROJ_NAME} ${DOCKER_RUST_IMAGE}
-DOCKER_NGINX_TOOL=docker run -it --rm -v ${ROOT_DIR}:/src -w /src/${MODULE_PROJ_NAME} ${DOCKER_NGIX_IMAGE}
+DOCKER_BUILD_TOOL=docker run -it -e CARGO_HOME=/src/.linux-cargo --rm -v ${HOST_PROJ_DIR}:/src -w /src ${RUST_TOOL_IMAGE}
 DOCKER_NGINX_NAME=nginx-test
 DOCKER_NGINX_EXEC=docker exec -it ${DOCKER_NGINX_NAME}
 DOCKER_NGINX_EXECD=docker exec -d ${DOCKER_NGINX_NAME}
@@ -71,8 +71,14 @@ nginx-setup:	nginx-source nginx-configure
 
 nginx-module:
 	cd nginx/${NGINX_SRC}; \
-	make modules; \
+	make modules; 
+
+nginx-module-release:	nginx-module
+	cd nginx/${NGINX_SRC}; \
 	strip objs/*.so
+
+
+
 
 
 
@@ -82,43 +88,22 @@ copy-module:
 	docker cp ngx-copy:/etc/nginx/modules/${MODULE_NAME}.so ${MODULE_SO_HOST}
 	docker rm -v ngx-copy
 
-# build module using docker
-# we copy only necessary context to docker daemon (src and module directory)
-build-module-docker:
-	rm -rf $(DOCKER_BUILD)/context
-	mkdir $(DOCKER_BUILD)/context
-	cp $(DOCKER_BUILD)/Dockerfile.module $(DOCKER_BUILD)/context
-	cp -r collector-ngx $(DOCKER_BUILD)/context
-	cp -r collector-transport $(DOCKER_BUILD)/context
-	cp -r collector-tests $(DOCKER_BUILD)/context
-	cp -r module $(DOCKER_BUILD)/context
-	cp -r test $(DOCKER_BUILD)/context
-	docker build -f $(DOCKER_BUILD)/context/Dockerfile.module -t ${DOCKER_MODULE_IMAGE}:${GIT_COMMIT} $(DOCKER_BUILD)/context
-	docker tag ${DOCKER_MODULE_IMAGE}:${GIT_COMMIT} ${DOCKER_MODULE_IMAGE}:${TAG}
-	
 
-# build module and deposit in the module directory
-build-module: build-module-docker copy-module
+# open bash tool on docker build
+docker-build-bash:
+	echo "path ${HOST_PROJ_DIR}"
+	${DOCKER_BUILD_TOOL} /bin/bash
 
-# build base container image that pre-compiles rust and nginx modules
-build-base:
-	docker build -f $(DOCKER_BUILD)/Dockerfile.base -t ${DOCKER_MODULE_BASE_IMAGE}:${GIT_COMMIT} .
-	docker tag ${DOCKER_MODULE_BASE_IMAGE}:${GIT_COMMIT} ${DOCKER_MODULE_BASE_IMAGE}:${TAG}
+docker-build-nginx-setup:
+	${DOCKER_BUILD_TOOL} make nginx-setup
 
 
-run-base-image:
-	docker run -it --rm  ${DOCKER_MODULE_BASE_IMAGE}:dev /bin/bash
-
-
-run-module-image:
-	docker run -it --rm  ${DOCKER_MODULE_IMAGE}:dev /bin/bash
-
+docker-build-module:
+	${DOCKER_BUILD_TOOL} make nginx-module
 
 
 watch-mixer:
 	 kubectl logs -f $(kubectl get pod -l istio=mixer -n istio-system -o jsonpath='{.items[0].metadata.name}')  -n istio-system -c mixer	
-
-
 
 
 # setup nginx container for testing
@@ -151,12 +136,20 @@ test-docker-only:
 	docker rm -f nginx || true
 	docker run --name nginx -d ${DOCKER_MODULE_IMAGE}:${TAG} 
 
+# build image for testing
+test-build-image:	docker-build-module
+	docker build -f $(DOCKER_BUILD)/Dockerfile.module --build-arg VERSION=${NGINX_VER} -t ${DOCKER_MODULE_IMAGE}:${GIT_COMMIT} .
+	docker tag ${DOCKER_MODULE_IMAGE}:${GIT_COMMIT} ${DOCKER_MODULE_IMAGE}:${TAG}
+		
+# remove test deployment image
 test-k8-nginx-clean:
 	kubectl delete deployment nginx-test || true
 
-test-k8-only:	
+# deploy test image in k8
+test-k8-deploy:	test-build-image
 	./scripts/k8-test.sh nginx-test ${DOCKER_NGINX_NAME} ${DOCKER_MODULE_IMAGE} ${TAG}
 
+# show test logs
 test-nginx-log:
 	docker logs -f nginx-test
 
@@ -172,7 +165,7 @@ kafka-add-test-topic:
 	kubectl -n kafka exec testclient -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --topic test --create --partitions 1 --replication-factor 1	
 
 # display message from beggining on test channel
-kafka-test-list-message:
+test-kafkalist-message:
 	kubectl run temp-kafka --image solsson/kafka --rm -ti --command -- bash \
 	bin/kafka-console-consumer.sh --bootstrap-server broker.kafka:9092 --topic nginx --from-beginning	
 
