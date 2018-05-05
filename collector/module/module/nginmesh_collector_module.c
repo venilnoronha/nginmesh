@@ -42,7 +42,7 @@ typedef struct  {
 } ngx_http_collector_srv_conf_t;
 
 
-static ngx_int_t ngx_http_collector_report_handler(ngx_http_request_t *r);
+ngx_int_t ngx_http_collector_report_handler(ngx_http_request_t *r);
 
 
 static ngx_int_t ngx_http_collector_filter_init(ngx_conf_t *cf);
@@ -52,10 +52,10 @@ void *ngx_http_collector_create_loc_conf(ngx_conf_t *cf);
 char *ngx_http_collector_merge_loc_conf(ngx_conf_t *cf, void *parent,void *child);
 
 void *ngx_http_collector_create_srv_conf(ngx_conf_t *cf);
-static char *ngx_http_collector_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child);
+char *ngx_http_collector_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child);
 
-static void *ngx_http_collector_create_main_conf(ngx_conf_t *cf);
-static char *nginmesh_http_collector_server_post(ngx_conf_t *cf, void *data, void *conf);    
+void *ngx_http_collector_create_main_conf(ngx_conf_t *cf);
+char *nginmesh_http_collector_server_post(ngx_conf_t *cf, void *data, void *conf);    
 
 static ngx_conf_post_handler_pt  ngx_http_collector_server_p =
     nginmesh_http_collector_server_post;
@@ -186,6 +186,7 @@ ngx_module_t ngx_http_collector_module = {
 };
 
 // install log phase handler for collector
+
 static ngx_int_t ngx_http_collector_filter_init(ngx_conf_t *cf) {
 
 
@@ -207,10 +208,12 @@ static ngx_int_t ngx_http_collector_filter_init(ngx_conf_t *cf) {
     return NGX_OK;   
 }
 
+
 /**
  * collector report handler.
  *
  */
+/*
 static ngx_int_t ngx_http_collector_report_handler(ngx_http_request_t *r)
 {
     ngx_http_collector_loc_conf_t  *loc_conf;
@@ -234,6 +237,7 @@ static ngx_int_t ngx_http_collector_report_handler(ngx_http_request_t *r)
    return NGX_OK;
 
 } 
+*/
 
 // create loc conf for collector
 /*
@@ -289,7 +293,7 @@ static void *ngx_http_collector_create_srv_conf(ngx_conf_t *cf) {
     return conf;
 }*/
 
-
+/*
 static char *ngx_http_collector_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 {
     ngx_log_debug(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0, "merging srv conf");
@@ -306,8 +310,9 @@ static char *ngx_http_collector_merge_srv_conf(ngx_conf_t *cf, void *parent, voi
 
     return NGX_CONF_OK;
 }
+*/
 
-
+/*
 static void *ngx_http_collector_create_main_conf(ngx_conf_t *cf)
 {
   ngx_http_collector_main_conf_t *conf;
@@ -321,8 +326,10 @@ static void *ngx_http_collector_create_main_conf(ngx_conf_t *cf)
 
   return conf;
 }
+*/
 
 // set collector server
+/*
 static char *nginmesh_http_collector_server_post(ngx_conf_t *cf, void *post, void *data)
 {
     ngx_str_t  *server = data;
@@ -338,3 +345,4 @@ static char *nginmesh_http_collector_server_post(ngx_conf_t *cf, void *post, voi
 
    return NGX_OK;
 }
+*/

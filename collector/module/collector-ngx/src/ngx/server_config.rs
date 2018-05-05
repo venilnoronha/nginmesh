@@ -1,7 +1,7 @@
 extern crate ngx_rust;
 
 use ngx_rust::bindings::*;
-
+use ngx::config::ServerConfig;
 use nginmesh_collector_transport::attribute::attr_wrapper::AttributeWrapper;
 use nginmesh_collector_transport::attribute::global_dict::{ SOURCE_IP, SOURCE_UID, SOURCE_SERVICE, SOURCE_PORT,
                     DESTINATION_SERVICE,DESTINATION_IP,DESTINATION_UID
@@ -21,9 +21,9 @@ pub struct ngx_http_collector_srv_conf_t {
     pub source_port:            ngx_uint_t
 }
 
-impl ngx_http_collector_srv_conf_t {
+impl ServerConfig for ngx_http_collector_srv_conf_t {
 
-    pub fn init(&mut self)  {
+    fn init(&mut self)  {
         self.source_port = NGX_CONF_UNSET_UINT!();
     }
     
