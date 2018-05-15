@@ -1,6 +1,6 @@
 NGINX_VER = 1.13.7
 TAG=dev
-RUST_COMPILER_TAG = 1.25.0
+RUST_COMPILER_TAG = 1.26.0
 DOCKER_REPO=nginmesh
 export HOST_PROJ_DIR=$(shell PWD)
 UNAME_S := $(shell uname -s)
@@ -153,9 +153,6 @@ test-k8-deploy:	test-build-image
 test-nginx-log:
 	docker logs -f nginx-test
 
-test-k8-setup:
-	kubectl exec -it nginx-test-57df6c6988-d6wnf /bin/bash
-	kubectl port-forward nginx-test-57df6c6988-d6wnf 8000:8000 &
 
 test-show-k8-logs:
 	kubectl logs $(kubectl get pod -l app=nginmesh -o jsonpath='{.items[0].metadata.name}')

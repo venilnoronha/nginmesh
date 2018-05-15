@@ -26,4 +26,4 @@ pub use collector_report::ngx_http_collector_merge_loc_conf;
 pub use collector_report::ngx_http_collector_create_srv_conf;
 pub use collector_report::ngx_http_collector_merge_srv_conf;
 pub use collector_report::ngx_http_collector_create_main_conf;
-pub use collector_report::nginmesh_http_collector_server_post;
+

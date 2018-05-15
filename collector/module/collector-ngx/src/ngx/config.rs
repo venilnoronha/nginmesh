@@ -102,8 +102,10 @@ macro_rules! ngx_conf_merge_uint_value {
 macro_rules! ngx_http_conf_get_module_main_conf {
     ( $cf:expr,$module:expr) =>  ( 
         {
+
             let ctx: &ngx_http_conf_ctx_t = & *($cf.ctx as *mut ngx_http_conf_ctx_t) ;
-            ctx.main_conf.offset($module.ctx_index as isize)           
+            let ptr = ctx.main_conf;
+            *ptr.offset($module.ctx_index as isize)           
         }
         
     )
@@ -151,3 +153,4 @@ pub trait CollectorConfig {
     fn process_istio_attr(&self, attr: &mut AttributeWrapper);
 
 }
+

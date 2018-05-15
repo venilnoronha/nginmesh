@@ -6,6 +6,7 @@ use std::ptr;
 use std::os::raw::c_void;
 use std::ffi::CString;
 use std::ffi::CStr;
+use std::slice;
 
 
 use ngx_rust::bindings::*;
@@ -21,21 +22,6 @@ use ngx::config::ServerConfig;
 use kafka::producer::{Producer, Record, RequiredAcks};
 use std::fmt::Write;
 use std::time::Duration;
-
-
-// initialize channel that can be shared
-/*
-lazy_static! {
-    static ref CHANNELS: Channels<MixerInfo> = {
-        let (tx, rx) = channel();
-
-        Channels {
-            tx: Mutex::new(tx),
-            rx: Mutex::new(rx),
-        }
-    };
-}
-*/
 
 lazy_static!  {
     static ref PRODUCER_CACHE: Mutex<HashMap<String,Producer>> = Mutex::new(HashMap::new());
@@ -107,20 +93,7 @@ pub extern "C" fn ngx_http_collector_create_main_conf(cf: &ngx_conf_s) -> *mut c
     }  
 }
 
-#[no_mangle]
-pub extern "C" fn nginmesh_http_collector_server_post(cf: &ngx_conf_s,
-     _post: *mut c_void, server: &ngx_str_t) -> *const u_char {
 
-    ngx_event_debug!("start invoking main collector post");
-  //  ngx_log_debug(NGX_LOG_DEBUG_HTTP,  cf->log, 0, "start invoking main collector post");
-
-    nginmesh_set_collector_server_config(server);
-
-   // ngx_log_debug(NGX_LOG_DEBUG_HTTP, cf->log, 0, "finish calling main collector report handler");
-
-
-   return NGX_OK_PTR!();
-}
 
 
 extern "C" {
@@ -206,26 +179,173 @@ pub extern "C" fn  ngx_http_collector_report_handler(request: &ngx_http_request_
 
 
 // install log phase handler for collector
-/*
+
 #[no_mangle]
 pub extern "C" fn ngx_http_collector_filter_init(cf: &ngx_conf_s) -> ngx_int_t {
 
     unsafe {
         let cmcf: &mut ngx_http_core_main_conf_t = &mut * (ngx_http_conf_get_module_main_conf!(cf, ngx_http_core_module) as *mut ngx_http_core_main_conf_t);
-
         let h1 = ngx_array_push(&mut cmcf.phases[ngx_http_phases::NGX_HTTP_LOG_PHASE as usize].handlers);
         if h1.is_null() {
             return NGX_ERROR!();
-        }
-      // *h1 = ngx_http_collector_report_handler;
+         }
 
-    // ngx_log_debug(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0, "registering collector report handler");
+        let fn_ptrz =  ngx_http_collector_report_handler as *const fn() -> () as usize;
+        
+        *(h1 as *mut usize) = *(&fn_ptrz as *const usize);
 
-        return NGX_OK!();   
+        NGX_OK!() 
+    
     }
     
 }
-*/
+
+// set loca conf topic
+#[no_mangle]
+pub extern "C" fn  collector_conf_set_topic(cf: &ngx_conf_s, 
+        cmd: &ngx_command_s, 
+        loc_conf: &mut ngx_http_collector_loc_conf_t) -> *const char {
+
+    unsafe {
+        let args: &ngx_array_t = & *cf.args;
+        let value_array: &[ngx_str_t] = slice::from_raw_parts(args.elts as *const ngx_str_t,args.nelts);
+        let topic = value_array[1];
+        loc_conf.topic.len = topic.len;
+        loc_conf.topic.data = topic.data;
+    }
+
+    NGX_CONF_OK!()
+}
+
+// set main conf server address
+#[no_mangle]
+pub extern "C" fn  collector_conf_set_server(cf: &ngx_conf_s, 
+        cmd: &ngx_command_s, 
+        main_conf: &mut ngx_http_collector_main_conf_t) -> *const char {
+
+    unsafe {
+        let args: &ngx_array_t = & *cf.args;
+        let value_array: &[ngx_str_t] = slice::from_raw_parts(args.elts as *const ngx_str_t,args.nelts);
+        let value = value_array[1];
+        main_conf.collector_server.len = value.len;
+        main_conf.collector_server.data = value.data;
+        nginmesh_set_collector_server_config(&main_conf.collector_server);
+    }
+
+    NGX_CONF_OK!()
+}
+
+#[no_mangle]
+pub extern "C" fn  collector_conf_set_destination_service(cf: &ngx_conf_s, 
+        cmd: &ngx_command_s, 
+        srv_conf: &mut ngx_http_collector_srv_conf_t) -> *const char {
+
+    unsafe {
+        let args: &ngx_array_t = & *cf.args;
+        let value_array: &[ngx_str_t] = slice::from_raw_parts(args.elts as *const ngx_str_t,args.nelts);
+        let value = value_array[1];
+        srv_conf.destination_service.len = value.len;
+        srv_conf.destination_service.data = value.data;
+    }
+
+    NGX_CONF_OK!()
+}
+
+#[no_mangle]
+pub extern "C" fn  collector_conf_set_destination_uid(cf: &ngx_conf_s, 
+        cmd: &ngx_command_s, 
+        srv_conf: &mut ngx_http_collector_srv_conf_t) -> *const char {
+
+    unsafe {
+        let args: &ngx_array_t = & *cf.args;
+        let value_array: &[ngx_str_t] = slice::from_raw_parts(args.elts as *const ngx_str_t,args.nelts);
+        let value = value_array[1];
+        srv_conf.destination_uid.len = value.len;
+        srv_conf.destination_uid.data = value.data;
+    }
+
+    NGX_CONF_OK!()
+}
+
+#[no_mangle]
+pub extern "C" fn  collector_conf_set_destination_ip(cf: &ngx_conf_s, 
+        cmd: &ngx_command_s, 
+        srv_conf: &mut ngx_http_collector_srv_conf_t) -> *const char {
+
+    unsafe {
+        let args: &ngx_array_t = & *cf.args;
+        let value_array: &[ngx_str_t] = slice::from_raw_parts(args.elts as *const ngx_str_t,args.nelts);
+        let value = value_array[1];
+        srv_conf.destination_ip.len = value.len;
+        srv_conf.destination_ip.data = value.data;
+    }
+
+    NGX_CONF_OK!()
+}
+
+#[no_mangle]
+pub extern "C" fn  collector_conf_set_source_ip(cf: &ngx_conf_s, 
+        cmd: &ngx_command_s, 
+        srv_conf: &mut ngx_http_collector_srv_conf_t) -> *const char {
+
+    unsafe {
+        let args: &ngx_array_t = & *cf.args;
+        let value_array: &[ngx_str_t] = slice::from_raw_parts(args.elts as *const ngx_str_t,args.nelts);
+        let value = value_array[1];
+        srv_conf.source_ip.len = value.len;
+        srv_conf.source_ip.data = value.data;
+    }
+
+    NGX_CONF_OK!()
+}
+
+#[no_mangle]
+pub extern "C" fn  collector_conf_set_source_uid(cf: &ngx_conf_s, 
+        cmd: &ngx_command_s, 
+        srv_conf: &mut ngx_http_collector_srv_conf_t) -> *const char {
+
+    unsafe {
+        let args: &ngx_array_t = & *cf.args;
+        let value_array: &[ngx_str_t] = slice::from_raw_parts(args.elts as *const ngx_str_t,args.nelts);
+        let value = value_array[1];
+        srv_conf.source_uid.len = value.len;
+        srv_conf.source_uid.data = value.data;
+    }
+
+    NGX_CONF_OK!()
+}
+
+#[no_mangle]
+pub extern "C" fn  collector_conf_set_source_service(cf: &ngx_conf_s, 
+        cmd: &ngx_command_s, 
+        srv_conf: &mut ngx_http_collector_srv_conf_t) -> *const char {
+
+    unsafe {
+        let args: &ngx_array_t = & *cf.args;
+        let value_array: &[ngx_str_t] = slice::from_raw_parts(args.elts as *const ngx_str_t,args.nelts);
+        let value = value_array[1];
+        srv_conf.source_service.len = value.len;
+        srv_conf.source_service.data = value.data;
+    }
+
+    NGX_CONF_OK!()
+}
+
+#[no_mangle]
+pub extern "C" fn  collector_conf_set_source_port(cf: &ngx_conf_s, 
+        cmd: &ngx_command_s, 
+        srv_conf: &mut ngx_http_collector_srv_conf_t) -> *const char {
+
+    unsafe {
+        let args: &ngx_array_t = & *cf.args;
+        let value_array: &[ngx_str_t] = slice::from_raw_parts(args.elts as *const ngx_str_t,args.nelts);
+        let value = value_array[1];
+        srv_conf.source_port = ngx_atoi(value.data, value.len) as ngx_uint_t;
+    }
+
+    NGX_CONF_OK!()
+}
+
 
 
 
