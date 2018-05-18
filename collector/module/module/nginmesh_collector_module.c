@@ -14,8 +14,6 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 
-ngx_int_t ngx_http_collector_report_handler(ngx_http_request_t *r);
-
 
 ngx_int_t ngx_http_collector_filter_init(ngx_conf_t *cf);
 
@@ -32,7 +30,7 @@ void *ngx_http_collector_create_main_conf(ngx_conf_t *cf);
 void  nginmesh_set_collector_server_config(ngx_str_t *server);
 
 ngx_int_t  nginmesh_collector_init(ngx_cycle_t *cycle);
-void  nginmesh_collector_exit();
+
 char *collector_conf_set_topic(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *collector_conf_set_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *collector_conf_set_destination_service(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
@@ -149,7 +147,7 @@ ngx_module_t ngx_http_collector_module = {
     NGX_HTTP_MODULE, /* module type */
     NULL, /* init master */
     NULL, /* init module */
-    nginmesh_collector_init, /* init process */
+    NULL, /* init process */
     NULL, /* init thread */
     NULL, /* exit thread */
     NULL, /* exit process */

@@ -97,6 +97,8 @@ docker-build-bash:
 docker-build-nginx-setup:
 	${DOCKER_BUILD_TOOL} make nginx-setup
 
+docker-build-nginx-configure:
+	${DOCKER_BUILD_TOOL} make nginx-configure
 
 docker-build-module:
 	${DOCKER_BUILD_TOOL} make nginx-module

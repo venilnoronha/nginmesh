@@ -15,15 +15,13 @@ extern crate nginmesh_collector_transport;
 
 
 pub mod message;
-pub mod collector_report;
-pub mod collector_threads;
+pub mod collector_module;
 
-pub use collector_threads::nginmesh_collector_init;
-pub use collector_threads::nginmesh_collector_exit;
-pub use collector_report::nginmesh_collector_report_handler;
-pub use collector_report::ngx_http_collector_create_loc_conf;
-pub use collector_report::ngx_http_collector_merge_loc_conf;
-pub use collector_report::ngx_http_collector_create_srv_conf;
-pub use collector_report::ngx_http_collector_merge_srv_conf;
-pub use collector_report::ngx_http_collector_create_main_conf;
+
+pub use collector_module::nginmesh_collector_report_handler;
+pub use collector_module::ngx_http_collector_create_loc_conf;
+pub use collector_module::ngx_http_collector_merge_loc_conf;
+pub use collector_module::ngx_http_collector_create_srv_conf;
+pub use collector_module::ngx_http_collector_merge_srv_conf;
+pub use collector_module::ngx_http_collector_create_main_conf;
 

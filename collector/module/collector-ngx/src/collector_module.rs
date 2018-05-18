@@ -103,80 +103,6 @@ extern "C" {
 }
 
 
-/**
- * collector report handler.
- *
- */
-#[no_mangle]
-pub extern "C" fn  ngx_http_collector_report_handler(request: &ngx_http_request_s) -> ngx_int_t {
-
-   // ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0, "start invoking collector report handler");
-    ngx_http_debug!(request,"start report handler");
-   /*
-    let ctx_ptr: *const c_void = ptr::null();
-    let commands_ptr: *const ngx_command_t = ptr::null();
-    let COLLECTOR_MODULE = ngx_module_s {
-        ctx_index: NGX_MODULE_UNSET_INDEX!(),
-        index: NGX_MODULE_UNSET_INDEX!(),                         
-        name: CString::new("test").unwrap().into_raw(),
-        spare0: 0,
-        spare1: 0, 
-        version: nginx_version as usize, 
-        signature: NGX_NULL_PTR!(),
-        ctx: ctx_ptr as *mut c_void,
-        commands: commands_ptr as *mut ngx_command_t,
-        type_: NGX_HTTP_MODULE as usize,
-        init_master: None,
-        init_module: None,
-        init_process: None,
-        init_thread: None,
-        exit_thread: None,
-        exit_process: None,
-        exit_master: None,
-        spare_hook0: 0usize,
-        spare_hook1: 0usize,
-        spare_hook2: 0usize,
-        spare_hook3: 0usize,
-        spare_hook4: 0usize,
-        spare_hook5: 0usize,
-        spare_hook6: 0usize,
-        spare_hook7: 0usize
-    };
-    */
-
-    unsafe {
-        
-        let c_str: &CStr = CStr::from_ptr(NGX_HTTP_COLLECTOR_MODULE.name);
-        let str_slice: &str = c_str.to_str().unwrap();
-        ngx_http_debug!(request,"collector module name: {}",str_slice);
-        let index = NGX_HTTP_COLLECTOR_MODULE.ctx_index;
-         ngx_http_debug!(request,"collector module index: {}",index);
-         /*
-        let ptr = request.loc_conf.offset(index as isize);
-        if ptr.is_null() {
-              ngx_http_debug!(request,"loc  conf is null");
-        } */
-        let loc_conf_ptr = ngx_http_get_module_loc_conf!(request, NGX_HTTP_COLLECTOR_MODULE);
-        let loc_conf: &mut ngx_http_collector_loc_conf_t = &mut * ( loc_conf_ptr as *mut ngx_http_collector_loc_conf_t);
-        let src_conf_ptr = ngx_http_get_module_srv_conf!(request,NGX_HTTP_COLLECTOR_MODULE);
-        let srv_conf: &mut ngx_http_collector_srv_conf_t = &mut * (src_conf_ptr as *mut ngx_http_collector_srv_conf_t);
-        let main_conf_ptr = ngx_http_get_module_main_conf!(request, NGX_HTTP_COLLECTOR_MODULE);
-        let main_conf: &mut ngx_http_collector_main_conf_t = &mut * (main_conf_ptr as *mut ngx_http_collector_main_conf_t);
-    
-    //    ngx_log_debug2(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0, "using collector server: %*s",main_conf->collector_server.len,main_conf->collector_server.data);
-
-        ngx_http_debug!(request,"invoking nginmesh report handler");
-        // invoke mix client
-        nginmesh_collector_report_handler(request,main_conf,srv_conf,loc_conf);
-
-        //ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0, "finish calling collector report handler");
-        NGX_OK!()
-
-    }
-    
-
-} 
-
 
 // install log phase handler for collector
 
@@ -390,34 +316,6 @@ fn send_stat(message: &str,server_name: &str,topic: &str) {
 }
 
 
-/*
-pub fn collector_report_background()  {
-
-    let rx = CHANNELS.rx.lock().unwrap();
-    let mut producer: Producer  = Producer::from_hosts(vec!("broker.kafka:9092".to_owned()))
-                .with_ack_timeout(Duration::from_secs(1))
-                .with_required_acks(RequiredAcks::One)
-                .create()
-                .unwrap();
-
-
-    loop {
-        ngx_event_debug!("mixer report  thread waiting");
-        let info = rx.recv().unwrap();
-        ngx_event_debug!("mixer report thread woke up");
-
-        
-        let mut buf = String::with_capacity(2);
-        let _ = write!(&mut buf, "{}", info.attributes); 
-        producer.send(&Record::from_value("test", buf.as_bytes())).unwrap();
-        ngx_event_debug!("send event to kafka topic test");
-
-        ngx_event_debug!("mixer report thread: finished sending to kafka");
-    }
-}
-*/
-
-
 // Total Upstream response Time Calculation Function Start
 
 fn upstream_response_time_calculation( upstream_states: *const ngx_array_t ) -> i64 {
@@ -442,8 +340,31 @@ fn upstream_response_time_calculation( upstream_states: *const ngx_array_t ) -> 
 }
 
 
-#[no_mangle]
-pub extern fn nginmesh_collector_report_handler(request: &ngx_http_request_s,
+fn  ngx_http_collector_report_handler(request: &ngx_http_request_s) -> ngx_int_t {
+
+   // ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0, "start invoking collector report handler");
+    ngx_http_debug!(request,"start report handler");
+  
+    unsafe {
+        
+        let loc_conf_ptr = ngx_http_get_module_loc_conf!(request, NGX_HTTP_COLLECTOR_MODULE);
+        let loc_conf: &mut ngx_http_collector_loc_conf_t = &mut * ( loc_conf_ptr as *mut ngx_http_collector_loc_conf_t);
+        let src_conf_ptr = ngx_http_get_module_srv_conf!(request,NGX_HTTP_COLLECTOR_MODULE);
+        let srv_conf: &mut ngx_http_collector_srv_conf_t = &mut * (src_conf_ptr as *mut ngx_http_collector_srv_conf_t);
+        let main_conf_ptr = ngx_http_get_module_main_conf!(request, NGX_HTTP_COLLECTOR_MODULE);
+        let main_conf: &mut ngx_http_collector_main_conf_t = &mut * (main_conf_ptr as *mut ngx_http_collector_main_conf_t);
+    
+        nginmesh_collector_report_handler(request,main_conf,srv_conf,loc_conf);
+
+        NGX_OK!()
+
+    }
+    
+
+} 
+
+
+pub fn nginmesh_collector_report_handler(request: &ngx_http_request_s,
     main_config: &ngx_http_collector_main_conf_t,
     srv_conf: &ngx_http_collector_srv_conf_t,
     loc_conf: &ngx_http_collector_loc_conf_t)  {
