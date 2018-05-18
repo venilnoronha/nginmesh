@@ -9,7 +9,7 @@ The current version of nginMesh is designed to work with Istio release 0.7.1. It
 
 ## Architecture
 The diagram below depicts how an NGINX sidecar proxy is implemented. Sidecar uses the open source version of NGINX compiled with modules for tracing and monitoring.
-In 0.7.1 release, nginMesh leverages Kafka for delivery traffic metrics across the Service Mesh. Security features, such as mTLS authentication are planned in upcoming releases.
+In 0.7.2 release, nginMesh leverages Kafka for delivery traffic metrics across the Service Mesh. Security features, such as mTLS authentication are planned in upcoming releases.
 
 ![Alt text](/images/nginx_sidecar.png?raw=true "NGINX Sidecar")
 
@@ -28,9 +28,9 @@ nginMesh requires installation of Istio first.
 ```
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=0.7.1 sh -
 ```
-2. Download nginMesh release 0.7.1:
+2. Download nginMesh release 0.7.2:
 ```
-curl -L https://github.com/nginmesh/nginmesh/releases/download/0.7.1/nginmesh-0.7.1.tar.gz | tar zx
+curl -L https://github.com/nginmesh/nginmesh/releases/download/0.7.2/nginmesh-0.7.2.tar.gz | tar zx
 ```
 
 3. Deploy Istio between sidecars:
@@ -65,7 +65,7 @@ kubectl get pods -n istio-system
 6. Automatic sidecar:
 To set up sidecar injection, please run following script which will install Istio webhook with nginMesh customization.
 ```
-nginmesh-0.7.1/install/kubernetes/install-sidecar.sh
+nginmesh-0.7.2/install/kubernetes/install-sidecar.sh
 ```
 
 7. Verify that istio-injection label is not labeled for the default namespace :
@@ -101,14 +101,14 @@ tiller-deploy-f44659b6c-p48hf                        1/1       Running   0      
 4. Run the following script to setup Kafka. It will be installed in 'kafka' namespace.  It is also possible to use existing kafka installation.
 
 ```
-nginmesh-0.7.1/install/kafka/install.sh
+nginmesh-0.7.2/install/kafka/install.sh
 ```
 Note: In GKE environment you may need to grant permission to default serviceaccount for cluster-wide access before install:
 
 ```
 kubectl create serviceaccount --namespace kube-system tiller
 kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller","automountServiceAccountToken": true}}}}'
 ```
 
 5. Wait for a while and make sure all kafka and zookeeper pods are up and runnning:
@@ -139,12 +139,12 @@ my-kafka	           1           Tue Mar 27 18:45:18 2018	          DEPLOYE
 7. Set up  topic named "nginmesh" by running below script:
 
 ```
-nginmesh-0.7.1/tools/kafka-add-topics.sh nginmesh
+nginmesh-0.7.2/tools/kafka-add-topics.sh nginmesh
 ```
 8. View created topic by running below script:
 
 ```
-nginmesh-0.7.1/tools/kafka-list-topics.sh
+nginmesh-0.7.2/tools/kafka-list-topics.sh
 ```
 ```
 nginmesh
@@ -162,7 +162,7 @@ kubectl label namespace default istio-injection=enabled
 2. Deploy the application:
 
 ```
-kubectl apply -f  nginmesh-0.7.1/samples/bookinfo/kube/bookinfo.yaml
+kubectl apply -f  nginmesh-0.7.2/samples/bookinfo/kube/bookinfo.yaml
 ```
 
 3. Confirm that all application services are deployed: productpage, details, reviews, ratings:
@@ -213,13 +213,14 @@ http://<Public-IP-of-the-Ingress-Controller>/productpage
 Note: For E2E routing rules and performace testing you could refer to [E2E Test](istio/tests/README.md).
 
 ### Demo nginMesh streaming using Graylog
-[Demo Graylog](istio/release/demo/graylog/README.md) Please, refer for Graylog integration with nginMesh.
+1. [Demo Graylog](istio/release/demo/graylog/README.md) Please, refer for Graylog integration with nginMesh.
+2. [Demo KSQL](istio/release/demo/ksql/README.md) Please, refer for KSQL integration with nginMesh.
 
 ### Uninstalling the Application
 1. To uninstall application, run:
 
 ```
-./nginmesh-0.7.1/samples/bookinfo/kube/cleanup.sh
+./nginmesh-0.7.2/samples/bookinfo/kube/cleanup.sh
 ```
 
 
@@ -234,7 +235,7 @@ kubectl delete -f istio-0.7.1/install/kubernetes/istio.yaml
 2. To uninstall the initializer, run:
 
 ```
-nginmesh-0.7.1/install/kubernetes/delete-sidecar.sh
+nginmesh-0.7.2/install/kubernetes/delete-sidecar.sh
 ```
 
 ### Uninstalling Kafka
@@ -242,7 +243,7 @@ nginmesh-0.7.1/install/kubernetes/delete-sidecar.sh
 1. Uninstall Kafka:
 
 ```
-nginmesh-0.7.1/install/kafka/uninstall.sh
+nginmesh-0.7.2/install/kafka/uninstall.sh
 ``` 
 
 2. Delete Tiller deployment:
