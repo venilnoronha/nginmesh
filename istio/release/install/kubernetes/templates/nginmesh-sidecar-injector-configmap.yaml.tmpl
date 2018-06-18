@@ -1,5 +1,5 @@
 # Template for nginmesh sidecar
-# this works with Istio 0.7.1
+# this works with Istio 0.8.0
 kind: ConfigMap
 metadata:
   name: istio-inject
@@ -39,7 +39,7 @@ data:
           privileged: true
       containers:
       - name: istio-proxy
-        image: {NGINMESH_IMAGE_HUB}/nginmesh/proxy_debug:{NGINMESH_VERSION}
+        image: {NGINMESH_IMAGE_HUB}/nginsako/proxy_debug:{NGINMESH_VERSION}
         args:
         - proxy
         - sidecar

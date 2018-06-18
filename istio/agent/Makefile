@@ -1,4 +1,4 @@
-VERSION = 0.7.1
+VERSION = 0.9.0
 NGINX_VER = 1.14.0
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
 SIDECAR_IMAGE_NAME=proxy_debug

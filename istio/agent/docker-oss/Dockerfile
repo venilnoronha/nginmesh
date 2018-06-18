@@ -1,4 +1,4 @@
-FROM nginx:1.13.7
+FROM nginx:1.14.0
 
 RUN apt-get update && apt-get install -y curl vim-tiny net-tools procps libcurl3-gnutls
 
@@ -10,7 +10,7 @@ ADD build/libs /usr/local/lib/
 RUN ldconfig
 
 # Debug options
-ARG DISABLE_MIXER_REPORT=0
+ARG DISABLE_MIXER_REPORT=1
 ARG DISABLE_MIXER_CHECK=1
 ARG DISABLE_TRACING=0
 

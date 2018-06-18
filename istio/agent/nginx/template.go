@@ -129,11 +129,7 @@ server {
     }{{end}}
 }{{end}}`
 
-const mainTemplate = `load_module /etc/nginx/modules/ngx_http_collector_module.so;
-load_module /etc/nginx/modules/ngx_stream_nginmesh_dest_module.so;
-
-
-load_module /etc/nginx/modules/ngx_http_opentracing_module.so;
+const mainTemplate = `load_module /etc/nginx/modules/ngx_http_opentracing_module.so;
 load_module /etc/nginx/modules/ngx_http_zipkin_module.so;
 
 
@@ -220,7 +216,7 @@ stream {
     server {
         listen 15001;
         access_log /dev/stdout basic;
-        nginmesh_dest on;
+        nginmesh_dest off;
 
         proxy_pass $nginmesh_server;
 

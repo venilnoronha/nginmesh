@@ -38,10 +38,11 @@ spec:
       serviceAccountName: istio-sidecar-injector-service-account
       containers:
         - name: webhook
-          image: docker.io/istio/sidecar_injector:0.7.1
+          image: docker.io/istio/sidecar_injector:0.8.0
           imagePullPolicy: IfNotPresent
           args:
-            - --tlsCertFile=/etc/istio/certs/cert.pem
+            - --caCertFile=/etc/istio/certs/root-cert.pem
+            - --tlsCertFile=/etc/istio/certs/cert-chain.pem
             - --tlsKeyFile=/etc/istio/certs/key.pem
             - --injectConfig=/etc/istio/inject/config
             - --meshConfig=/etc/istio/config/mesh

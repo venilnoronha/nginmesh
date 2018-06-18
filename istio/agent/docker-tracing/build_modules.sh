@@ -4,7 +4,7 @@
 
 set -ex
 
-NGINX_VERSION=1.13.7
+NGINX_VERSION=1.14.0
 
 TEMP_DIR="$(mktemp -d)" 
 
@@ -29,7 +29,7 @@ make && make install
 cd $TEMP_DIR
 
 ### Get nginx-opentracing source
-git clone https://github.com/opentracing-contrib/nginx-opentracing.git 
+git clone https://github.com/rnburn/nginx-opentracing.git
 
 ## Build nginx-opentracing modules
 wget -O nginx-release-$NGINX_VERSION.tar.gz https://github.com/nginx/nginx/archive/release-$NGINX_VERSION.tar.gz
